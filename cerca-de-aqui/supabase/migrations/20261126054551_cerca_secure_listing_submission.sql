@@ -2,7 +2,7 @@
 create or replace function public.cerca_submit_listing(
   p_listing jsonb, p_method text, p_reference_note text default ''
 )
-returns uuid language plpgsql security definer set search_path = ''
+returns uuid language plpgsql security invoker set search_path = ''
 as $$
 declare v_id uuid; v_plan text; v_price integer;
 begin
