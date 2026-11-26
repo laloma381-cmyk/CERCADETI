@@ -32,12 +32,21 @@ Estas tres migraciones se han aplicado al proyecto Supabase cxdfejzmeqrjhzupdhdb
 2. 20261126054538_cerca_admin_review_rpc.sql
 3. 20261126054551_cerca_secure_listing_submission.sql
 
+## Verificaciones realizadas
+
+- Se comprobó que las tablas propias de Cerca de Aquí existen y mantienen RLS.
+- Se comprobó la relación foránea entre solicitudes de pago y anuncios, utilizada por el panel de administración.
+- Se comprobó que el trigger de Supabase crea el perfil de cada usuario nuevo.
+- Se comprobó que existe una cuenta con permisos activos de superadministrador.
+- Se añadió al sitio el formulario para establecer una contraseña nueva desde el enlace de recuperación.
+- Las funciones de envío y revisión de anuncios están configuradas como SECURITY INVOKER.
+
 ## Pendiente antes de considerarla terminada
 
 1. Probar registro, inicio y recuperación de contraseña desde un navegador real.
-2. Probar envío de una solicitud con cuenta normal.
+2. Probar envío de una solicitud con una cuenta normal.
 3. Probar revisión y publicación con la cuenta superadministradora.
-4. Probar los permisos reales con sesiones de usuario y superadministrador; los avisos de seguridad específicos de Cerca de Aquí ya no aparecen en el análisis de Supabase.
-5. Publicar en un alojamiento permanente gratuito que permita expresamente el uso comercial y verificar el dominio HTTPS.
+4. Probar los permisos reales con sesiones de usuario y superadministrador.
+5. Conectar el repositorio a Netlify Free y verificar el despliegue HTTPS. Netlify indica que su plan gratuito permite proyectos comerciales, sujeto a un límite mensual de créditos; el alojamiento gratuito no incluye garantía de disponibilidad.
 
 No incluir claves secretas, claves service-role, credenciales ni datos bancarios en archivos públicos. La clave publicable del backend se puede utilizar en el cliente porque la seguridad se aplica mediante RLS y funciones del servidor.
