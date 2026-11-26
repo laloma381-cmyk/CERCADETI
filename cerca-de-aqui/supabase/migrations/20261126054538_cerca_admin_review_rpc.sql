@@ -1,6 +1,6 @@
 -- Revisión atómica de pagos y publicación. Solo el superadministrador real de CAJUMAV.
 create or replace function public.cerca_admin_review_listing(p_listing_id uuid, p_approve boolean)
-returns void language plpgsql security definer set search_path = ''
+returns void language plpgsql security invoker set search_path = ''
 as $$
 declare v_plan text;
 begin
