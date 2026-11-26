@@ -37,7 +37,7 @@ Estas tres migraciones se han aplicado al proyecto Supabase cxdfejzmeqrjhzupdhdb
 1. Probar registro, inicio y recuperación de contraseña desde un navegador real.
 2. Probar envío de una solicitud con cuenta normal.
 3. Probar revisión y publicación con la cuenta superadministradora.
-4. Revisar los avisos de seguridad de Supabase y separar los avisos preexistentes de CAJUMAV.
+4. Probar los permisos reales con sesiones de usuario y superadministrador; los avisos de seguridad específicos de Cerca de Aquí ya no aparecen en el análisis de Supabase.
 5. Publicar en un alojamiento permanente gratuito que permita expresamente el uso comercial y verificar el dominio HTTPS.
 
 No incluir claves secretas, claves service-role, credenciales ni datos bancarios en archivos públicos. La clave publicable del backend se puede utilizar en el cliente porque la seguridad se aplica mediante RLS y funciones del servidor.
