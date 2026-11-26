@@ -1,0 +1,3 @@
+[build]
+  base = "cerca-de-aqui"
+  publish = "."
