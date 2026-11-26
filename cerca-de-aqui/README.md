@@ -14,7 +14,10 @@ Aplicación web móvil para conectar vecinos, comercios y servicios de Pilar de 
 
 ## Implementación actual
 
-- index.html: interfaz móvil, autenticación, recuperación de contraseña, búsqueda y categorías.
+- index.html: interfaz móvil, registro e inicio de sesión, recuperación de contraseña, aceptación obligatoria de términos y política de privacidad, búsqueda y categorías.
+- terminos.html y privacidad.html: documentos legales provisionales. Falta completar identidad y correo de contacto del responsable antes de abrir el servicio al público.
+- cerca_user_consents: registro de versión y fecha de aceptación por usuario; RLS impide leer o registrar consentimientos de otras cuentas.
+- El directorio, las solicitudes de anuncios y la moderación requieren sesión autenticada y aceptación de las versiones vigentes.
 - supabase/migrations/: migraciones de cerca_listings y cerca_payment_reports, políticas RLS y funciones de envío y moderación.
 - Backend conectado al proyecto Supabase existente de CAJUMAV.
 - Las tablas y funciones de Cerca de Aquí llevan prefijo cerca_; no se modifican las tablas de chats, perfiles ni datos familiares.
@@ -43,10 +46,11 @@ Estas tres migraciones se han aplicado al proyecto Supabase cxdfejzmeqrjhzupdhdb
 
 ## Pendiente antes de considerarla terminada
 
-1. Probar registro, inicio y recuperación de contraseña desde un navegador real.
-2. Probar envío de una solicitud con una cuenta normal.
-3. Probar revisión y publicación con la cuenta superadministradora.
-4. Probar los permisos reales con sesiones de usuario y superadministrador.
-5. Conectar el repositorio a Netlify Free y verificar el despliegue HTTPS. Netlify indica que su plan gratuito permite proyectos comerciales, sujeto a un límite mensual de créditos; el alojamiento gratuito no incluye garantía de disponibilidad.
+1. Completar en terminos.html y privacidad.html el nombre o razón social, domicilio y correo real del responsable; revisar jurídicamente ambos textos antes del lanzamiento.
+2. Probar registro, confirmación de correo, inicio y recuperación de contraseña desde un navegador real.
+3. Probar envío de una solicitud con una cuenta normal.
+4. Probar revisión y publicación con la cuenta superadministradora.
+5. Probar los permisos reales con sesiones de usuario y superadministrador.
+6. Conectar el repositorio a Netlify Free y desplegar esta versión; el sitio Netlify actual no está vinculado a este repositorio. Netlify indica que su plan gratuito permite proyectos comerciales, sujeto a un límite mensual de créditos; el alojamiento gratuito no incluye garantía de disponibilidad.
 
 No incluir claves secretas, claves service-role, credenciales ni datos bancarios en archivos públicos. La clave publicable del backend se puede utilizar en el cliente porque la seguridad se aplica mediante RLS y funciones del servidor.
