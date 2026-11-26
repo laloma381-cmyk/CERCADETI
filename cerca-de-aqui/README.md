@@ -10,28 +10,34 @@ Aplicación web móvil para conectar vecinos, comercios y servicios de Pilar de 
 - Ficha de negocio: 5 € / mes.
 - Ficha de negocio destacada: 8 € / mes.
 - No hay publicaciones gratuitas.
-- Una publicación solo puede mostrarse si administración confirma el pago y la activa.
+- Una publicación solo aparece si el superadministrador confirma el pago.
 
-## Estructura incluida
+## Implementación actual
 
-- `index.html`: interfaz móvil inicial.
-- `supabase/migrations/`: esquema SQL, políticas RLS, pagos pendientes y moderación.
-- Los usuarios solo pueden crear solicitudes pendientes y comunicar un pago; no pueden aprobarse ni publicarse a sí mismos.
-- Las publicaciones públicas requieren estado publicado, pago verificado y fecha de vigencia.
-- La función de autorización administrativa está aislada en el esquema privado.
+- index.html: interfaz móvil, autenticación, recuperación de contraseña, búsqueda y categorías.
+- supabase/migrations/: migraciones de cerca_listings y cerca_payment_reports, políticas RLS y funciones de envío y moderación.
+- Backend conectado al proyecto Supabase existente de CAJUMAV.
+- Las tablas y funciones de Cerca de Aquí llevan prefijo cerca_; no se modifican las tablas de chats, perfiles ni datos familiares.
+- La autenticación utiliza Supabase Auth del proyecto existente.
+- El administrador se verifica en backend con el rol real super_admin, el indicador is_super_admin y la cuenta no suspendida.
+- El usuario puede enviar solicitudes y declarar Bizum o efectivo; eso NO confirma el pago.
+- El superadministrador revisa el justificante y la función transaccional publica el anuncio solo tras aprobarlo.
+- Las publicaciones públicas deben tener pago verificado y fechas de vigencia válidas.
 
-## Estado real de la implementación
+## Migraciones aplicadas
 
-La interfaz visual y las migraciones SQL están en esta rama. **Las migraciones todavía no se han aplicado y la aplicación aún no es operativa**: falta un backend aislado y un alojamiento web.
+Estas tres migraciones se han aplicado al proyecto Supabase cxdfejzmeqrjhzupdhdb y se conservan aquí para control de versiones:
 
-Se intentó crear un proyecto Supabase independiente con coste mensual de 0 €. La cuenta indica que ya se ha alcanzado el límite de dos proyectos gratuitos activos. No se ha pausado ni eliminado ningún proyecto existente y no se ha reutilizado la base de datos de CAJUMA, para mantener los datos de ambas aplicaciones separados.
+1. 20261126054509_cerca_de_aqui_isolated_tables_and_rls.sql
+2. 20261126054538_cerca_admin_review_rpc.sql
+3. 20261126054551_cerca_secure_listing_submission.sql
 
-## Requisitos para completar el despliegue
+## Pendiente antes de considerarla terminada
 
-1. Disponer de un proyecto backend independiente gratuito para Cerca de Aquí.
-2. Aplicar las migraciones de esta carpeta y verificar RLS/advisors.
-3. Conectar autenticación, envío de solicitudes y panel de moderación.
-4. Configurar el administrador desde el backend; nunca desde el navegador.
-5. Publicar en un alojamiento gratuito que permita expresamente el uso comercial.
+1. Probar registro, inicio y recuperación de contraseña desde un navegador real.
+2. Probar envío de una solicitud con cuenta normal.
+3. Probar revisión y publicación con la cuenta superadministradora.
+4. Revisar los avisos de seguridad de Supabase y separar los avisos preexistentes de CAJUMAV.
+5. Publicar en un alojamiento permanente gratuito que permita expresamente el uso comercial y verificar el dominio HTTPS.
 
-No incluir claves secretas, claves service-role, credenciales ni datos bancarios en archivos públicos. La clave publicable del backend sí puede usarse en el cliente cuando RLS esté correctamente configurado.
+No incluir claves secretas, claves service-role, credenciales ni datos bancarios en archivos públicos. La clave publicable del backend se puede utilizar en el cliente porque la seguridad se aplica mediante RLS y funciones del servidor.
