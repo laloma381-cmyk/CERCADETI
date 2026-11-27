@@ -19,9 +19,14 @@ function render(){
  $('resultCount').textContent=filtered.length+' negocios encontrados';
  $('cards').innerHTML=rows.length?rows.map(x=>{
   const phone=String(x.contact_phone||'').replace(/[^0-9]/g,'');
+  const tel=String(x.contact_phone||'').trim();
   const map='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent([x.address,x.locality].filter(Boolean).join(', '));
-  const photo=x.photo_url?'<img class="business-photo" src="'+esc(x.photo_url)+'" alt="Foto de '+esc(x.title)+'" loading="lazy">':'<div class="business-photo business-fallback">'+icon(x.category)+'</div>';
-  return '<article class="business-card">'+photo+'<div><h3>'+esc(x.title)+'</h3><span class="business-tag">'+esc(x.category)+'</span><p class="business-meta">📍 '+esc(x.locality)+'</p><p class="business-meta">🕒 '+esc(x.opening_hours||'Horario no facilitado')+'</p><p class="business-meta">'+(x.is_featured||x.plan==='featured'?'⭐ Destacado':'● Publicado')+'</p></div><div class="business-actions"><a href="https://wa.me/'+phone+'" target="_blank" rel="noopener">WhatsApp</a><a href="tel:'+esc(x.contact_phone)+'">Llamar</a><a href="'+map+'" target="_blank" rel="noopener">Cómo llegar</a></div></article>';
+  const sponsored=!!(x.is_featured||x.plan==='featured');
+  const photo=x.photo_url
+   ?'<img class="business-photo" src="'+esc(x.photo_url)+'" alt="Foto de '+esc(x.title)+'" loading="lazy">'
+   :'<div class="business-photo business-fallback">'+icon(x.category)+'</div>';
+  const ribbon=sponsored?'<span class="business-ribbon sponsored">⭐ PATROCINADO</span>':'<span class="business-ribbon">'+esc(x.category||'Negocio local')+'</span>';
+  return '<article class="business-card"><div class="business-photo-wrap">'+photo+ribbon+'</div><div class="business-card-content"><h3>'+esc(x.title)+'</h3><span class="business-tag">'+esc(x.category)+'</span><p class="business-meta">📍 '+esc([x.locality,x.address].filter(Boolean).join(' · ')||'Dirección no facilitada')+'</p><p class="business-meta">🕒 '+esc(x.opening_hours||'Horario no facilitado')+'</p></div><div class="business-actions"><a href="tel:'+esc(tel)+'">📞 Llamar</a><a href="https://wa.me/'+phone+'" target="_blank" rel="noopener">💬 WhatsApp</a><a href="'+map+'" target="_blank" rel="noopener">📍 Cómo llegar</a></div></article>';
  }).join(''):'<div class="empty"><b>Aún no hay negocios en esta búsqueda</b>Prueba otra palabra o categoría. ¿Conoces un comercio que debería aparecer?<br><a class="action" href="contrata.html">Registrar un comercio</a></div>';
  const pages=Math.max(1,Math.ceil(filtered.length/pageSize));
  $('pageInfo').textContent='Página '+(page+1)+' de '+pages;
