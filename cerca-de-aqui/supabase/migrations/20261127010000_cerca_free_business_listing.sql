@@ -6,7 +6,11 @@ alter table public.cerca_listings
   drop constraint if exists cerca_listings_payment_status_check,
   drop constraint if exists cerca_listings_plan_check;
 
+alter table public.cerca_listings drop constraint if exists cerca_listings_category_check;
+
 alter table public.cerca_listings
+  add constraint cerca_listings_category_check
+    check (category in ('Comercios','Servicios','Ofertas','Eventos','Hostelería','Hogar','Otros','Belleza','Salud','Tiendas','Motor')),
   add constraint cerca_listings_plan_check
     check (plan in ('directory_free','basic','standard','featured','business','business_plus')),
   add constraint cerca_listings_payment_status_check
