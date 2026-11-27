@@ -37,7 +37,7 @@ Estas tres migraciones se han aplicado al proyecto Supabase cxdfejzmeqrjhzupdhdb
 
 ## Migración pendiente de aplicar
 
-- `20261127010000_cerca_free_business_listing.sql`: migración consolidada pendiente de aplicar. Habilita fichas gratuitas sin pago ni caducidad, coordenadas opcionales latitude/longitude, publicación pública solo tras aprobación, y administración aislada mediante cerca_admins/cerca_is_admin. Corrige además la revisión de fichas gratuitas sin justificante de pago. No modifica policies de profiles ni reports.
+- `20261127110000_cerca_free_listing_and_admin_isolation.sql`: migración consolidada pendiente de aplicar. Habilita fichas gratuitas sin pago ni caducidad, coordenadas opcionales latitude/longitude, publicación pública solo tras aprobación, y administración aislada mediante cerca_admins/cerca_is_admin. Corrige además la revisión de fichas gratuitas sin justificante de pago. No modifica policies de profiles ni reports.
 
 ## Verificaciones realizadas
 
@@ -75,4 +75,4 @@ No incluir claves secretas, claves service-role, credenciales ni datos bancarios
 - El panel de Cerca de Ti administra únicamente cerca_listings y cerca_payment_reports. Se han retirado del panel las consultas y acciones sobre perfiles de mensajería y reportes de CAJUMAV.
 - La autorización administrativa se copia una sola vez desde los superadministradores vigentes a public.cerca_admins. Para conceder o retirar acceso administrativo de Cerca en el futuro, se modifica esa tabla desde el SQL Editor; no se alteran los roles globales de CAJUMAV.
 - Las coordenadas de negocio son opcionales, deben guardarse en pareja y tienen validación de rango. El formulario actual no las solicita todavía; quedan preparadas para los futuros pines.
-- Aplicar en Supabase SQL Editor el archivo completo `cerca-de-aqui/supabase/migrations/20261127010000_cerca_free_business_listing.sql`. No ejecutar por separado los bloques de esta migración.
+- Aplicar en Supabase SQL Editor el archivo completo `cerca-de-aqui/supabase/migrations/20261127110000_cerca_free_listing_and_admin_isolation.sql`. No ejecutar por separado los bloques de esta migración.
