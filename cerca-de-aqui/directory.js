@@ -27,7 +27,7 @@ function render(){
  $('pageInfo').textContent='Página '+(page+1)+' de '+pages;
  $('prevPage').disabled=page===0;$('nextPage').disabled=page>=pages-1;
  $('listingPagination').style.display=pages>1?'flex':'none';
- updateMarkers(rows);
+ updateMarkers(filtered);
 }
 function updateMarkers(rows){
  const map=window.cercaMap;if(!map||!window.L)return;
