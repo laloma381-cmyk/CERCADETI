@@ -4,12 +4,12 @@ Aplicación web móvil para conectar vecinos, comercios y servicios de Pilar de 
 
 ## Modelo comercial
 
-- Anuncio básico: 2 € / 7 días.
-- Anuncio estándar: 5 € / 30 días.
-- Anuncio destacado: 7 € / 30 días.
-- Ficha de negocio: 5 € / mes.
-- Ficha de negocio destacada: 8 € / mes.
-- La ficha básica de un negocio en el directorio es gratuita; solo se cobra por promociones de visibilidad.
+- Ficha básica de directorio: gratuita, sin pago y sin caducidad; publicación tras revisión.
+- Promoción breve: 2 € / 7 días (tarifa propuesta, pendiente de validación).
+- Promoción estándar: 5 € / 30 días y destacada: 7 € / 30 días (tarifas propuestas).
+- Ficha profesional: 5 € / mes (tarifa propuesta).
+- Ficha profesional destacada: 8 € / mes (tarifa propuesta).
+- La ficha básica del directorio es siempre gratuita; solo se cobra por servicios opcionales de visibilidad.
 - Una publicación solo aparece si el superadministrador confirma el pago.
 
 ## Implementación actual
@@ -17,7 +17,7 @@ Aplicación web móvil para conectar vecinos, comercios y servicios de Pilar de 
 - index.html: interfaz móvil, registro e inicio de sesión, recuperación de contraseña, aceptación obligatoria de términos y política de privacidad, búsqueda y categorías.
 - terminos.html y privacidad.html: documentos legales provisionales. Falta completar identidad y correo de contacto del responsable antes de abrir el servicio al público.
 - cerca_user_consents: registro de versión y fecha de aceptación por usuario; RLS impide leer o registrar consentimientos de otras cuentas.
-- El directorio, las solicitudes de anuncios y la moderación requieren sesión autenticada y aceptación de las versiones vigentes.
+- El directorio es público; enviar una ficha o solicitar una promoción requiere sesión autenticada y aceptación de las versiones vigentes.
 - supabase/migrations/: migraciones de cerca_listings y cerca_payment_reports, políticas RLS y funciones de envío y moderación.
 - Backend conectado al proyecto Supabase existente de CAJUMAV.
 - Las tablas y funciones de Cerca de Aquí llevan prefijo cerca_; no se modifican las tablas de chats, perfiles ni datos familiares.
@@ -59,7 +59,7 @@ No incluir claves secretas, claves service-role, credenciales ni datos bancarios
 ## Monetización visible en la web (rama feature/monetizacion-cercadeti)
 
 - El menú principal incluye accesos a "Contrata y destaca tu negocio" y "Quitar publicidad para siempre".
-- `contrata.html`: ficha básica gratuita y tarifas de promoción: 2 € / 7 días, 5 € / 30 días, destacado 7 € / 30 días, ficha profesional 5 € / mes y ficha destacada 8 € / mes. Las solicitudes se envían por correo a cercadetiapp2026@gmail.com; no hay cobro automático integrado.
+- `contrata.html`: ficha básica gratuita y tarifas orientativas de promociones, pendientes de validación definitiva por el titular. Las solicitudes se envían por correo a cercadetiapp2026@gmail.com; no hay cobro automático integrado.
 - `sin-publicidad.html`: explica la futura compra única vitalicia para eliminar anuncios. El precio queda pendiente de fijar y no se cobra todavía.
 - Los términos describen la ficha básica gratuita, los planes de visibilidad, el proceso de contratación por correo y la futura modalidad vitalicia sin anuncios.
 - La política de privacidad anticipa la futura integración de publicidad de terceros y exige actualizar proveedor/consentimiento antes de activarla.
