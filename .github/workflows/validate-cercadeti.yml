@@ -30,6 +30,25 @@ jobs:
           Path("/tmp/cerca-de-ti.mjs").write_text(scripts[0], encoding="utf-8")
           PY
           node --check /tmp/cerca-de-ti.mjs
+      - name: Comprobar integración OpenStreetMap y Leaflet
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          html = Path("cerca-de-aqui/index.html").read_text(encoding="utf-8")
+          checks = {
+              "sin iframe de Google Maps": "google.com/maps" not in html and 'id="googleLocalMap"' not in html,
+              "contenedor Leaflet presente": 'id="localMap"' in html,
+              "CSS de Leaflet": "leaflet@1.9.4/dist/leaflet.css" in html,
+              "JavaScript de Leaflet": "leaflet@1.9.4/dist/leaflet.js" in html,
+              "tiles de OpenStreetMap": "tile.openstreetmap.org" in html,
+              "mapa inicializado": "initMap();" in html,
+              "centro por defecto de Pilar": "37.8657,-0.7906" in html,
+          }
+          for label, ok in checks.items():
+              print(("OK" if ok else "ERROR") + " - " + label)
+          if not all(checks.values()):
+              raise SystemExit("La integración del mapa no supera las comprobaciones.")
+          PY
       - name: Comprobar enlaces internos
         run: |
           python3 - <<'PY'
