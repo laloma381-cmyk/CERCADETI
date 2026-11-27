@@ -37,7 +37,7 @@ function updateMarkers(rows){
 }
 async function load(){
  $('cards').innerHTML='<div class="empty"><b>Cargando negocios…</b>Actualizando el directorio.</div>';
- const {data,error}=await db.from('cerca_listings').select('id,title,category,locality,address,description,contact_phone,plan,starts_at,expires_at,latitude,longitude,photo_url,opening_hours,is_featured,created_by_admin').eq('publication_status','published').eq('payment_status','verified').lte('starts_at',new Date().toISOString()).gt('expires_at',new Date().toISOString()).order('is_featured',{ascending:false}).order('created_at',{ascending:false}).range(0,499);
+ const {data,error}=await db.from('cerca_listings').select('id,title,category,locality,address,description,contact_phone,plan,starts_at,expires_at,latitude,longitude,photo_url,opening_hours,is_featured,created_by_admin').eq('publication_status','published').eq('payment_status','verified').lte('starts_at',new Date().toISOString()).gt('expires_at',new Date().toISOString()).order('is_featured',{ascending:false}).order('starts_at',{ascending:false}).range(0,499);
  if(error){console.error('Cerca de Ti:',error);$('resultCount').textContent='Directorio temporalmente no disponible';$('cards').innerHTML='<div class="empty"><b>Estamos actualizando el directorio</b>Inténtalo de nuevo en unos segundos.<br><button class="action" onclick="loadListings()">Reintentar</button></div>';return}
  listings=data||[];refreshFiltered();
 }
