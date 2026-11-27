@@ -31,6 +31,13 @@ alter table public.cerca_listings
   );
 
 drop policy if exists "cerca_public_active_paid" on public.cerca_listings;
+create policy "cerca_owner_creates_free_business" on public.cerca_listings
+for insert to authenticated with check (
+  owner_id = (select auth.uid()) and plan = 'directory_free'
+  and price_cents = 0 and payment_status = 'not_required'
+  and publication_status = 'pending' and starts_at is null and expires_at is null
+);
+
 create policy "cerca_public_active_listings" on public.cerca_listings
 for select to anon, authenticated using (
   publication_status = 'published' and
