@@ -103,7 +103,7 @@ async function loadListings(){
   .order('plan',{ascending:false}).order('starts_at',{ascending:false});
  if(featuredOnly)query=query.eq('plan','featured');
  if(activeCat!=='Todos')query=query.eq('category',activeCat);
- const q=$('q').value.trim().replace(/[%_,().]/g,' ').replace(/\\s+/g,' ').trim();
+ const q=$('q').value.trim().replace(/[%_,().]/g,' ').replace(/\s+/g,' ').trim();
  if(q)query=query.or('title.ilike.%'+q+'%,description.ilike.%'+q+'%,locality.ilike.%'+q+'%');
  const from=listingPage*PAGE_SIZE;
  const {data,error,count}=await query.range(from,from+PAGE_SIZE-1);
@@ -174,16 +174,14 @@ window.reviewListing=async(id,approve)=>{if(!isAdmin)return;const {error}=await 
 async function loadAdmin(){
  if(!isAdmin){$('adminListings').textContent='Acceso restringido al superadministrador.';return}
  $('adminListings').textContent='Cargando solicitudes…';
- const {data:rows,error}=await supabase.from('cerca_listings').select('id,title,category,locality,plan,price_cents,payment_status,publication_status,created_at,owner_id').order('created_at',{ascending:false}).limit(100);
+ const {data:rows,error}=await supabase.from('cerca_listings').select('id,title,category,locality,plan,price_cents,payment_status,publication_status,created_at,owner_id,expires_at').order('created_at',{ascending:false}).limit(100);
  if(error){$('adminListings').textContent='Error al cargar: '+error.message;return}
  const pending=(rows||[]).filter(x=>x.publication_status==='pending');
  const ids=pending.map(x=>x.id);
  let reports=[];
  if(ids.length){const r=await supabase.from('cerca_payment_reports').select('listing_id,method,reference_note,status,created_at').in('listing_id',ids);if(!r.error)reports=r.data||[]}
  const reportById=new Map(reports.map(x=>[x.listing_id,x]));
- const active=(rows||[]).filter(x=>x.publication_status==='published'&&x.payment_status==='verified');
- const featured=active.filter(x=>x.plan==='featured');
- $('adminStats').innerHTML='<b>Inventario publicitario</b><br>'+active.length+' activos · '+pending.length+' pendientes · '+featured.length+' destacados · '+(rows||[]).filter(x=>x.expires_at&&new Date(x.expires_at)<new Date()).length+' caducados';
+ $('adminStats').innerHTML='Las cifras generales se actualizan automáticamente.';
  $('adminListings').innerHTML=pending.length?pending.map(x=>{const r=reportById.get(x.id);return '<article class="business" style="align-items:flex-start;flex-wrap:wrap"><div class="business-info"><h3>'+esc(x.title)+'</h3><p>'+esc(x.locality)+' · '+esc(x.category)+' · '+esc(x.plan)+'</p><p>Precio: '+(x.price_cents/100).toFixed(2).replace('.',',')+' € · Pago: '+esc(x.payment_status)+'</p><p>Método: '+esc(r?.method||'Sin justificante')+' · Nota: '+esc(r?.reference_note||'—')+'</p><p>Recibido: '+new Date(x.created_at).toLocaleString('es-ES')+'</p></div><div style="display:flex;gap:7px"><button class="action" onclick="reviewListing(\''+x.id+'\',true)">Aprobar</button><button class="action secondary" onclick="reviewListing(\''+x.id+'\',false)">Rechazar</button></div></article>'}).join(''):'<div class="empty"><b>No hay solicitudes pendientes</b>Las nuevas contrataciones aparecerán aquí.</div>';
 }
 supabase.auth.onAuthStateChange(event=>{if(event==='PASSWORD_RECOVERY'){recoveryMode=true;openPanel('authModal');updateAuthUI()}setTimeout(()=>refreshSession(),0)});
