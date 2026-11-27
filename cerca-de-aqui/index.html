@@ -127,7 +127,7 @@ const DEFAULT_MAP_CENTER=[37.8657,-0.7906];
 let localMap=null,locationMarker=null,mapCenter=[...DEFAULT_MAP_CENTER],mapRequest=0;
 function initMap(){
  if(!window.L||!$('localMap')){console.error('Leaflet no se ha podido cargar');return}
- localMap=L.map('localMap',{zoomControl:true,scrollWheelZoom:false}).setView(DEFAULT_MAP_CENTER,14);
+ localMap=L.map('localMap',{zoomControl:true,scrollWheelZoom:false}).setView(DEFAULT_MAP_CENTER,14);window.cercaMap=localMap;
  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(localMap);
  locationMarker=L.marker(DEFAULT_MAP_CENTER).addTo(localMap).bindPopup('<b>Cerca de Ti</b><br>Pilar de la Horadada');
  setTimeout(()=>localMap.invalidateSize(),120);
