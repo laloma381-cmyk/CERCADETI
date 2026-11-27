@@ -54,7 +54,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           html = Path("cerca-de-aqui/index.html").read_text(encoding="utf-8")
-          sql = Path("cerca-de-aqui/supabase/migrations/20261127010000_cerca_free_business_listing.sql").read_text(encoding="utf-8")
+          sql = Path("cerca-de-aqui/supabase/migrations/20261127110000_cerca_free_listing_and_admin_isolation.sql").read_text(encoding="utf-8")
           checks = {
               "panel usa autorización propia Cerca": "rpc('cerca_is_admin')" in html,
               "panel no consulta profiles": "from('profiles')" not in html,
