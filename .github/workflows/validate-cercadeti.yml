@@ -72,6 +72,33 @@ jobs:
           if not all(checks.values()):
               raise SystemExit("La migración o el aislamiento no superan las comprobaciones.")
           PY
+      - name: Validar módulos del directorio y administración
+        run: |
+          node --check cerca-de-aqui/directory.js
+          node --check cerca-de-aqui/admin.js
+          python3 - <<'PY'
+          from pathlib import Path
+          html = Path("cerca-de-aqui/index.html").read_text(encoding="utf-8")
+          admin = Path("cerca-de-aqui/admin.js").read_text(encoding="utf-8")
+          directory = Path("cerca-de-aqui/directory.js").read_text(encoding="utf-8")
+          sql = Path("cerca-de-aqui/supabase/migrations/20261127150000_cerca_admin_catalogue_and_dashboard.sql").read_text(encoding="utf-8")
+          checks = {
+              "módulos JS enlazados": 'src="directory.js"' in html and 'src="admin.js"' in html,
+              "tarjetas con foto y acciones rápidas": "business-photo" in directory and "wa.me/" in directory and "Cómo llegar" in directory,
+              "búsqueda por categoría y texto": "categoryOK" in directory and "searchListings" in directory,
+              "pines sincronizados con filtros": "updateMarkers(filtered)" in directory,
+              "creación directa solo admin": "cerca_admin_create_listing" in admin and "cerca_private.is_admin()" in sql,
+              "panel con estadísticas de usuarios": "cerca_admin_dashboard_stats" in admin and "registered_users" in sql,
+              "aprobación y rechazo": "cerca_admin_review_listing" in admin,
+              "edición, pausa, destacado y borrado": all(x in admin for x in ["cerca_admin_update_listing","cerca_admin_set_listing_status","cerca_admin_delete_listing"]),
+              "almacenamiento de fotos protegido": "cerca-business-photos" in sql and "cerca_photo_admin_insert" in sql,
+              "plan gratuito restringido a admin": "plan='admin' and price_cents=0 and created_by_admin=true" in sql,
+          }
+          for label, ok in checks.items():
+              print(("OK" if ok else "ERROR") + " - " + label)
+          if not all(checks.values()):
+              raise SystemExit("La nueva arquitectura no supera las comprobaciones.")
+          PY
       - name: Comprobar enlaces internos
         run: |
           python3 - <<'PY'
