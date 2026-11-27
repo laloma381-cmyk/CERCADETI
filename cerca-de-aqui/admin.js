@@ -33,7 +33,7 @@ async function loadAdmin(){
  }).join(''):'<div class="empty"><b>El inventario está vacío</b>Añade el primer negocio con el botón superior.</div>';
  const pages=Math.max(1,Math.ceil(total/20));$('adminPageInfo').textContent='Página '+(adminPage+1)+' de '+pages;$('adminPrev').disabled=adminPage===0;$('adminNext').disabled=adminPage>=pages-1;$('adminPagination').style.display=pages>1?'flex':'none';
 }
-window.loadAdmin=loadAdmin;
+window.loadAdmin=loadAdmin;window.loadAdminStats=stats;
 window.changeAdminPage=delta=>{adminPage=Math.max(0,Math.min(Math.max(0,Math.ceil(total/20)-1),adminPage+delta));loadAdmin()};
 window.reviewListing=async(id,approve)=>{if(!admin)return;const {error}=await db.rpc('cerca_admin_review_listing',{p_listing_id:id,p_approve:approve});if(error){alert('No se pudo revisar la solicitud.');return}await stats();await loadAdmin();if(window.loadListings)await window.loadListings()};
 window.editAdminListing=async id=>{
