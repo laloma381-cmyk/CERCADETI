@@ -98,20 +98,7 @@ async function refreshSession(){const {data}=await supabase.auth.getSession();cu
 let listingPage=0,listingTotal=0,searchTimer=null;
 const PAGE_SIZE=20;
 window.searchListings=()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{listingPage=0;loadListings()},300)};
-async function loadListings(){
- let query=supabase.from('cerca_listings').select('id,title,category,locality,description,contact_phone,plan,starts_at,expires_at,latitude,longitude',{count:'exact'})
-  .eq('publication_status','published').eq('payment_status','verified').lte('starts_at',new Date().toISOString()).gt('expires_at',new Date().toISOString())
-  .order('plan',{ascending:false}).order('starts_at',{ascending:false});
- if(featuredOnly)query=query.eq('plan','featured');
- if(activeCat!=='Todos')query=query.eq('category',activeCat);
- const q=$('q').value.trim().replace(/[%_,().]/g,' ').replace(/\s+/g,' ').trim();
- if(q)query=query.or('title.ilike.%'+q+'%,description.ilike.%'+q+'%,locality.ilike.%'+q+'%');
- const from=listingPage*PAGE_SIZE;
- const {data,error,count}=await query.range(from,from+PAGE_SIZE-1);
- if(error){$('cards').innerHTML='<div class="empty"><b>No se pudieron cargar los negocios</b>Inténtalo de nuevo más tarde.</div>';return}
- allListings=data||[];listingTotal=count||0;renderListings();
-}
-window.changePage=delta=>{const pages=Math.max(1,Math.ceil(listingTotal/PAGE_SIZE));listingPage=Math.max(0,Math.min(pages-1,listingPage+delta));loadListings()};
+async function loadListings(){if(window.loadListings){await window.loadListings();return}}\nwindow.changePage=delta=>{const pages=Math.max(1,Math.ceil(listingTotal/PAGE_SIZE));listingPage=Math.max(0,Math.min(pages-1,listingPage+delta));loadListings()};
 function iconFor(category){const c=String(category||'').toLowerCase();if(/hostel|rest|cafe|bar/.test(c))return'🍽️';if(/belleza|pelu|estet/.test(c))return'💇';if(/salud|farm|med/.test(c))return'💊';if(/comerc|tiend/.test(c))return'🛍️';if(/hogar|repar/.test(c))return'🛠️';if(/motor|taller/.test(c))return'🚗';return'🧑‍💼'}
 function matchesCategory(x){if(activeCat==='Todos')return true;const c=String(x.category||'').toLowerCase();const map={'Hostelería':['hostel','rest','cafe','bar'],'Belleza':['belleza','pelu','estet','servicios'],'Salud':['salud','farm','med','servicios'],'Tiendas':['comerc','tiend'],'Hogar':['hogar','repar'],'Motor':['motor','taller','servicios'],'Servicios':['servicios','otros']};return (map[activeCat]||[]).some(k=>c.includes(k))}
 function renderListings(){
@@ -169,24 +156,7 @@ function collapseDrawer(){if(drawerExpanded)window.toggleDrawer()}
 let dragStart=0; $('drawerHandle').addEventListener('pointerdown',e=>{dragStart=e.clientY;$('drawerHandle').setPointerCapture(e.pointerId)});$('drawerHandle').addEventListener('pointerup',e=>{const delta=e.clientY-dragStart;if(delta<-35)expandDrawer();if(delta>35)collapseDrawer()});
 window.togglePaymentFields=()=>{$('paymentFields').hidden=false;$('freeListingNote').hidden=false};
 window.submitAd=async e=>{e.preventDefault();if(!currentUser||!currentConsent){$('adMessage').textContent='Inicia sesión y acepta los documentos vigentes para enviar tu anuncio.';$('adMessage').hidden=false;return}const button=$('submitAdButton');button.disabled=true;button.textContent='Enviando…';$('adMessage').hidden=true;try{const payload={title:$('adTitle').value.trim(),category:$('category').value,locality:$('locality').value,description:$('description').value.trim(),contact_phone:$('phone').value.trim(),plan:$('plan').value};const {data,error}=await supabase.rpc('cerca_submit_listing',{p_listing:payload,p_method:$('paymentMethod').value,p_reference_note:$('paymentNote').value.trim()});if(error)throw error;$('adMessage').textContent='Solicitud recibida. Revisaremos el pago y el anuncio; solo entonces comenzará el periodo contratado.';$('adMessage').hidden=false;$('adForm').reset();togglePaymentFields()}catch(err){$('adMessage').textContent=err.message||'No se pudo guardar la solicitud.';$('adMessage').hidden=false}finally{button.disabled=false;button.textContent='Enviar solicitud'}};
-window.showAdminTab=tab=>{if(tab==='listings')loadAdmin()};
-async function loadAdminStats(){const [listings,pending,active,featured]=await Promise.all([supabase.from('cerca_listings').select('id',{count:'exact',head:true}),supabase.from('cerca_listings').select('id',{count:'exact',head:true}).eq('publication_status','pending'),supabase.from('cerca_listings').select('id',{count:'exact',head:true}).eq('publication_status','published').eq('payment_status','verified'),supabase.from('cerca_listings').select('id',{count:'exact',head:true}).eq('publication_status','published').eq('payment_status','verified').eq('plan','featured')]);$('adminStats').innerHTML='<b>Inventario publicitario</b><br>'+(active.count??0)+' activos · '+(pending.count??0)+' pendientes · '+(featured.count??0)+' destacados · '+(listings.count??0)+' en total'};
-window.reviewListing=async(id,approve)=>{if(!isAdmin)return;const {error}=await supabase.rpc('cerca_admin_review_listing',{p_listing_id:id,p_approve:approve});if(error){alert('No se pudo revisar: '+error.message);return}await loadListings();await loadAdminStats();await loadAdmin()};
-let adminListingPage=0,adminListingTotal=0;
-window.changeAdminPage=delta=>{const pages=Math.max(1,Math.ceil(adminListingTotal/20));adminListingPage=Math.max(0,Math.min(pages-1,adminListingPage+delta));loadAdmin()};
-async function loadAdmin(){
- if(!isAdmin){$('adminListings').textContent='Acceso restringido al superadministrador.';return}
- $('adminListings').textContent='Cargando solicitudes…';
- const {data:rows,error,count}=await supabase.from('cerca_listings').select('id,title,category,locality,plan,price_cents,payment_status,publication_status,created_at,owner_id,expires_at',{count:'exact'}).eq('publication_status','pending').order('created_at',{ascending:false}).range(adminListingPage*20,adminListingPage*20+19);
- if(error){$('adminListings').textContent='Error al cargar: '+error.message;return}
- const pending=rows||[];adminListingTotal=count||0;
- const ids=pending.map(x=>x.id);
- let reports=[];
- if(ids.length){const r=await supabase.from('cerca_payment_reports').select('listing_id,method,reference_note,status,created_at').in('listing_id',ids);if(!r.error)reports=r.data||[]}
- const reportById=new Map(reports.map(x=>[x.listing_id,x]));
- $('adminListings').innerHTML=pending.length?pending.map(x=>{const r=reportById.get(x.id);return '<article class="business" style="align-items:flex-start;flex-wrap:wrap"><div class="business-info"><h3>'+esc(x.title)+'</h3><p>'+esc(x.locality)+' · '+esc(x.category)+' · '+esc(x.plan)+'</p><p>Precio: '+(x.price_cents/100).toFixed(2).replace('.',',')+' € · Pago: '+esc(x.payment_status)+'</p><p>Método: '+esc(r?.method||'Sin justificante')+' · Nota: '+esc(r?.reference_note||'—')+'</p><p>Recibido: '+new Date(x.created_at).toLocaleString('es-ES')+'</p></div><div style="display:flex;gap:7px"><button class="action" onclick="reviewListing(\''+x.id+'\',true)">Aprobar</button><button class="action secondary" onclick="reviewListing(\''+x.id+'\',false)">Rechazar</button></div></article>'}).join(''):'<div class="empty"><b>No hay solicitudes pendientes</b>Las nuevas contrataciones aparecerán aquí.</div>';const pages=Math.max(1,Math.ceil(adminListingTotal/20));$('adminPageInfo').textContent='Página '+(adminListingPage+1)+' de '+pages;$('adminPrev').disabled=adminListingPage===0;$('adminNext').disabled=adminListingPage>=pages-1;$('adminPagination').style.display=pages>1?'flex':'none';
-}
-supabase.auth.onAuthStateChange(event=>{if(event==='PASSWORD_RECOVERY'){recoveryMode=true;openPanel('authModal');updateAuthUI()}setTimeout(()=>refreshSession(),0)});
+window.showAdminTab=()=>{if(window.loadAdmin)window.loadAdmin()};\nasync function loadAdminStats(){if(window.loadAdminStats)await window.loadAdminStats()}\nasync function loadAdmin(){if(window.loadAdmin)await window.loadAdmin()}\nsupabase.auth.onAuthStateChange(event=>{if(event==='PASSWORD_RECOVERY'){recoveryMode=true;openPanel('authModal');updateAuthUI()}setTimeout(()=>refreshSession(),0)});
 initMap();drawCategories();updateMap();refreshSession();
 </script>
 <script type="module" src="directory.js"></script><script type="module" src="admin.js"></script></body></html>
