@@ -98,7 +98,8 @@ async function refreshSession(){const {data}=await supabase.auth.getSession();cu
 let listingPage=0,listingTotal=0,searchTimer=null;
 const PAGE_SIZE=20;
 window.searchListings=()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{listingPage=0;loadListings()},300)};
-async function loadListings(){if(window.loadListings){await window.loadListings();return}}\nwindow.changePage=delta=>{const pages=Math.max(1,Math.ceil(listingTotal/PAGE_SIZE));listingPage=Math.max(0,Math.min(pages-1,listingPage+delta));loadListings()};
+async function loadListings(){if(window.loadListings){await window.loadListings();return}}
+window.changePage=delta=>{const pages=Math.max(1,Math.ceil(listingTotal/PAGE_SIZE));listingPage=Math.max(0,Math.min(pages-1,listingPage+delta));loadListings()};
 function iconFor(category){const c=String(category||'').toLowerCase();if(/hostel|rest|cafe|bar/.test(c))return'🍽️';if(/belleza|pelu|estet/.test(c))return'💇';if(/salud|farm|med/.test(c))return'💊';if(/comerc|tiend/.test(c))return'🛍️';if(/hogar|repar/.test(c))return'🛠️';if(/motor|taller/.test(c))return'🚗';return'🧑‍💼'}
 function matchesCategory(x){if(activeCat==='Todos')return true;const c=String(x.category||'').toLowerCase();const map={'Hostelería':['hostel','rest','cafe','bar'],'Belleza':['belleza','pelu','estet','servicios'],'Salud':['salud','farm','med','servicios'],'Tiendas':['comerc','tiend'],'Hogar':['hogar','repar'],'Motor':['motor','taller','servicios'],'Servicios':['servicios','otros']};return (map[activeCat]||[]).some(k=>c.includes(k))}
 function renderListings(){
@@ -156,7 +157,10 @@ function collapseDrawer(){if(drawerExpanded)window.toggleDrawer()}
 let dragStart=0; $('drawerHandle').addEventListener('pointerdown',e=>{dragStart=e.clientY;$('drawerHandle').setPointerCapture(e.pointerId)});$('drawerHandle').addEventListener('pointerup',e=>{const delta=e.clientY-dragStart;if(delta<-35)expandDrawer();if(delta>35)collapseDrawer()});
 window.togglePaymentFields=()=>{$('paymentFields').hidden=false;$('freeListingNote').hidden=false};
 window.submitAd=async e=>{e.preventDefault();if(!currentUser||!currentConsent){$('adMessage').textContent='Inicia sesión y acepta los documentos vigentes para enviar tu anuncio.';$('adMessage').hidden=false;return}const button=$('submitAdButton');button.disabled=true;button.textContent='Enviando…';$('adMessage').hidden=true;try{const payload={title:$('adTitle').value.trim(),category:$('category').value,locality:$('locality').value,description:$('description').value.trim(),contact_phone:$('phone').value.trim(),plan:$('plan').value};const {data,error}=await supabase.rpc('cerca_submit_listing',{p_listing:payload,p_method:$('paymentMethod').value,p_reference_note:$('paymentNote').value.trim()});if(error)throw error;$('adMessage').textContent='Solicitud recibida. Revisaremos el pago y el anuncio; solo entonces comenzará el periodo contratado.';$('adMessage').hidden=false;$('adForm').reset();togglePaymentFields()}catch(err){$('adMessage').textContent=err.message||'No se pudo guardar la solicitud.';$('adMessage').hidden=false}finally{button.disabled=false;button.textContent='Enviar solicitud'}};
-window.showAdminTab=()=>{if(window.loadAdmin)window.loadAdmin()};\nasync function loadAdminStats(){if(window.loadAdminStats)await window.loadAdminStats()}\nasync function loadAdmin(){if(window.loadAdmin)await window.loadAdmin()}\nsupabase.auth.onAuthStateChange(event=>{if(event==='PASSWORD_RECOVERY'){recoveryMode=true;openPanel('authModal');updateAuthUI()}setTimeout(()=>refreshSession(),0)});
+window.showAdminTab=()=>{if(window.loadAdmin)window.loadAdmin()};
+async function loadAdminStats(){if(window.loadAdminStats)await window.loadAdminStats()}
+async function loadAdmin(){if(window.loadAdmin)await window.loadAdmin()}
+supabase.auth.onAuthStateChange(event=>{if(event==='PASSWORD_RECOVERY'){recoveryMode=true;openPanel('authModal');updateAuthUI()}setTimeout(()=>refreshSession(),0)});
 initMap();drawCategories();updateMap();refreshSession();
 </script>
 <script type="module" src="directory.js"></script><script type="module" src="admin.js"></script></body></html>
