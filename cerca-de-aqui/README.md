@@ -35,6 +35,10 @@ Estas tres migraciones se han aplicado al proyecto Supabase cxdfejzmeqrjhzupdhdb
 2. 20261126054538_cerca_admin_review_rpc.sql
 3. 20261126054551_cerca_secure_listing_submission.sql
 
+## Migración pendiente de aplicar
+
+- `20261127010000_cerca_free_business_listing.sql`: habilita la ficha básica gratuita sin pago ni caducidad, con moderación administrativa. Está versionada en esta rama, pero todavía no se ha aplicado al proyecto Supabase. Hasta aplicarla y probarla, el formulario de ficha gratuita no estará operativo en producción.
+
 ## Verificaciones realizadas
 
 - Se comprobó que las tablas propias de Cerca de Aquí existen y mantienen RLS.
