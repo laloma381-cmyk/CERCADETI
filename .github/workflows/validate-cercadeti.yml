@@ -1,4 +1,4 @@
-name: Validar Cerca de Ti
+name: Validar Cerca de Ti · directorio de pago
 on:
   push:
     branches: [feature/monetizacion-cercadeti]
@@ -49,23 +49,23 @@ jobs:
           if not all(checks.values()):
               raise SystemExit("La integración del mapa no supera las comprobaciones.")
           PY
-      - name: Comprobar aislamiento de datos y migración de fichas gratuitas
+      - name: Comprobar aislamiento de datos y modelo de anuncios de pago
         run: |
           python3 - <<'PY'
           from pathlib import Path
           html = Path("cerca-de-aqui/index.html").read_text(encoding="utf-8")
-          sql = Path("cerca-de-aqui/supabase/migrations/20261127110000_cerca_free_listing_and_admin_isolation.sql").read_text(encoding="utf-8")
+          sql = Path("cerca-de-aqui/supabase/migrations/20261127130000_cerca_paid_ads_inventory.sql").read_text(encoding="utf-8")
           checks = {
               "panel usa autorización propia Cerca": "rpc('cerca_is_admin')" in html,
               "panel no consulta profiles": "from('profiles')" not in html,
               "panel no consulta reports compartidos": "from('reports')" not in html,
-              "ficha gratuita sin pago": "directory_free" in sql and "not_required" in sql,
-              "publicación gratuita sin caducidad": "expires_at is null" in sql,
-              "revisión gratuita sin justificante": "if v_plan = 'directory_free' then" in sql,
-              "tabla de administradores aislada": "public.cerca_admins" in sql,
+              "solo planes de pago": "plan in ('basic','standard','featured')" in sql,
+              "tarifas 4, 6 y 9 euros": "then 400" in sql and "then 600" in sql and "then 900" in sql,
+              "no permite fichas gratis": "directory_free" not in sql and "not_required" not in sql,
+              "requiere pago informado": "payment_report_not_pending" in sql and "payment_status='pending'" in sql,
+              "publicación solo con pago verificado": "payment_status='verified'" in sql,
+              "tabla de administradores aislada": "public.cerca_admins" not in sql and "cerca_private.is_admin()" in sql,
               "sin cambios de políticas de CAJUMAV": "alter table public.profiles" not in sql.lower() and "alter table public.reports" not in sql.lower(),
-              "coordenadas opcionales": "add column if not exists latitude" in sql and "add column if not exists longitude" in sql,
-              "validación de pareja de coordenadas": "cerca_coordinates_pair_check" in sql,
           }
           for label, ok in checks.items():
               print(("OK" if ok else "ERROR") + " - " + label)
