@@ -49,6 +49,29 @@ jobs:
           if not all(checks.values()):
               raise SystemExit("La integración del mapa no supera las comprobaciones.")
           PY
+      - name: Comprobar aislamiento de datos y migración de fichas gratuitas
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          html = Path("cerca-de-aqui/index.html").read_text(encoding="utf-8")
+          sql = Path("cerca-de-aqui/supabase/migrations/20261127010000_cerca_free_business_listing.sql").read_text(encoding="utf-8")
+          checks = {
+              "panel usa autorización propia Cerca": "rpc('cerca_is_admin')" in html,
+              "panel no consulta profiles": "from('profiles')" not in html,
+              "panel no consulta reports compartidos": "from('reports')" not in html,
+              "ficha gratuita sin pago": "directory_free" in sql and "not_required" in sql,
+              "publicación gratuita sin caducidad": "expires_at is null" in sql,
+              "revisión gratuita sin justificante": "if v_plan = 'directory_free' then" in sql,
+              "tabla de administradores aislada": "public.cerca_admins" in sql,
+              "sin cambios de políticas de CAJUMAV": "alter table public.profiles" not in sql.lower() and "alter table public.reports" not in sql.lower(),
+              "coordenadas opcionales": "add column if not exists latitude" in sql and "add column if not exists longitude" in sql,
+              "validación de pareja de coordenadas": "cerca_coordinates_pair_check" in sql,
+          }
+          for label, ok in checks.items():
+              print(("OK" if ok else "ERROR") + " - " + label)
+          if not all(checks.values()):
+              raise SystemExit("La migración o el aislamiento no superan las comprobaciones.")
+          PY
       - name: Comprobar enlaces internos
         run: |
           python3 - <<'PY'
