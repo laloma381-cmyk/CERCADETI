@@ -9,7 +9,7 @@ Aplicación web móvil para conectar vecinos, comercios y servicios de Pilar de 
 - Anuncio destacado: 7 € / 30 días.
 - Ficha de negocio: 5 € / mes.
 - Ficha de negocio destacada: 8 € / mes.
-- No hay publicaciones gratuitas.
+- La ficha básica de un negocio en el directorio es gratuita; solo se cobra por promociones de visibilidad.
 - Una publicación solo aparece si el superadministrador confirma el pago.
 
 ## Implementación actual
@@ -54,3 +54,13 @@ Estas tres migraciones se han aplicado al proyecto Supabase cxdfejzmeqrjhzupdhdb
 6. Conectar el repositorio a Netlify Free y desplegar esta versión; el sitio Netlify actual no está vinculado a este repositorio. Netlify indica que su plan gratuito permite proyectos comerciales, sujeto a un límite mensual de créditos; el alojamiento gratuito no incluye garantía de disponibilidad.
 
 No incluir claves secretas, claves service-role, credenciales ni datos bancarios en archivos públicos. La clave publicable del backend se puede utilizar en el cliente porque la seguridad se aplica mediante RLS y funciones del servidor.
+
+
+## Monetización visible en la web (rama feature/monetizacion-cercadeti)
+
+- El menú principal incluye accesos a "Contrata y destaca tu negocio" y "Quitar publicidad para siempre".
+- `contrata.html`: ficha básica gratuita y tarifas de promoción: 2 € / 7 días, 5 € / 30 días, destacado 7 € / 30 días, ficha profesional 5 € / mes y ficha destacada 8 € / mes. Las solicitudes se envían por correo a cercadetiapp2026@gmail.com; no hay cobro automático integrado.
+- `sin-publicidad.html`: explica la futura compra única vitalicia para eliminar anuncios. El precio queda pendiente de fijar y no se cobra todavía.
+- Los términos describen la ficha básica gratuita, los planes de visibilidad, el proceso de contratación por correo y la futura modalidad vitalicia sin anuncios.
+- La política de privacidad anticipa la futura integración de publicidad de terceros y exige actualizar proveedor/consentimiento antes de activarla.
+- Esta rama no se ha fusionado ni desplegado. No se ha modificado el backend ni se ha activado una red publicitaria o sistema de pagos.
