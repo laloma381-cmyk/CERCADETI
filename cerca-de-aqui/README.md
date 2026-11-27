@@ -4,12 +4,12 @@ Aplicación web móvil para conectar vecinos, comercios y servicios de Pilar de 
 
 ## Modelo comercial
 
-- Anuncio básico: 2 € / 7 días.
-- Anuncio estándar: 5 € / 30 días.
-- Anuncio destacado: 7 € / 30 días.
-- Ficha de negocio: 5 € / mes.
-- Ficha de negocio destacada: 8 € / mes.
-- No hay publicaciones gratuitas.
+- Ficha básica de directorio: gratuita, sin pago y sin caducidad; publicación tras revisión.
+- Promoción breve: 2 € / 7 días (tarifa propuesta, pendiente de validación).
+- Promoción estándar: 5 € / 30 días y destacada: 7 € / 30 días (tarifas propuestas).
+- Ficha profesional: 5 € / mes (tarifa propuesta).
+- Ficha profesional destacada: 8 € / mes (tarifa propuesta).
+- La ficha básica del directorio es siempre gratuita; solo se cobra por servicios opcionales de visibilidad.
 - Una publicación solo aparece si el superadministrador confirma el pago.
 
 ## Implementación actual
@@ -17,10 +17,10 @@ Aplicación web móvil para conectar vecinos, comercios y servicios de Pilar de 
 - index.html: interfaz móvil, registro e inicio de sesión, recuperación de contraseña, aceptación obligatoria de términos y política de privacidad, búsqueda y categorías.
 - terminos.html y privacidad.html: documentos legales provisionales. Falta completar identidad y correo de contacto del responsable antes de abrir el servicio al público.
 - cerca_user_consents: registro de versión y fecha de aceptación por usuario; RLS impide leer o registrar consentimientos de otras cuentas.
-- El directorio, las solicitudes de anuncios y la moderación requieren sesión autenticada y aceptación de las versiones vigentes.
+- El directorio público muestra solo campos comerciales de fichas aprobadas; enviar una ficha o solicitar una promoción requiere sesión y aceptación legal.
 - supabase/migrations/: migraciones de cerca_listings y cerca_payment_reports, políticas RLS y funciones de envío y moderación.
 - Backend conectado al proyecto Supabase existente de CAJUMAV.
-- Las tablas y funciones de Cerca de Aquí llevan prefijo cerca_; no se modifican las tablas de chats, perfiles ni datos familiares.
+- Las tablas y funciones de Cerca de Ti llevan prefijo cerca_; la web no consulta ni modifica profiles/reports. El único uso de profiles es una copia inicial de los superadministradores a cerca_admins al aplicar la migración.
 - La autenticación utiliza Supabase Auth del proyecto existente.
 - El administrador se verifica en backend con el rol real super_admin, el indicador is_super_admin y la cuenta no suspendida.
 - El usuario puede enviar solicitudes y declarar Bizum o efectivo; eso NO confirma el pago.
@@ -34,6 +34,10 @@ Estas tres migraciones se han aplicado al proyecto Supabase cxdfejzmeqrjhzupdhdb
 1. 20261126054509_cerca_de_aqui_isolated_tables_and_rls.sql
 2. 20261126054538_cerca_admin_review_rpc.sql
 3. 20261126054551_cerca_secure_listing_submission.sql
+
+## Migración pendiente de aplicar
+
+- `20261127110000_cerca_free_listing_and_admin_isolation.sql`: migración consolidada pendiente de aplicar. Habilita fichas gratuitas sin pago ni caducidad, coordenadas opcionales latitude/longitude, publicación pública solo tras aprobación, y administración aislada mediante cerca_admins/cerca_is_admin. Corrige además la revisión de fichas gratuitas sin justificante de pago. No modifica policies de profiles ni reports.
 
 ## Verificaciones realizadas
 
@@ -54,3 +58,21 @@ Estas tres migraciones se han aplicado al proyecto Supabase cxdfejzmeqrjhzupdhdb
 6. Conectar el repositorio a Netlify Free y desplegar esta versión; el sitio Netlify actual no está vinculado a este repositorio. Netlify indica que su plan gratuito permite proyectos comerciales, sujeto a un límite mensual de créditos; el alojamiento gratuito no incluye garantía de disponibilidad.
 
 No incluir claves secretas, claves service-role, credenciales ni datos bancarios en archivos públicos. La clave publicable del backend se puede utilizar en el cliente porque la seguridad se aplica mediante RLS y funciones del servidor.
+
+
+## Monetización visible en la web (rama feature/monetizacion-cercadeti)
+
+- El menú principal incluye accesos a "Contrata y destaca tu negocio" y "Quitar publicidad para siempre".
+- `contrata.html`: ficha básica gratuita y tarifas orientativas de promociones, pendientes de validación definitiva por el titular. Las solicitudes se envían por correo a cercadetiapp2026@gmail.com; no hay cobro automático integrado.
+- `sin-publicidad.html`: explica la futura compra única vitalicia para eliminar anuncios. El precio queda pendiente de fijar y no se cobra todavía.
+- Los términos describen la ficha básica gratuita, los planes de visibilidad, el proceso de contratación por correo y la futura modalidad vitalicia sin anuncios.
+- La política de privacidad anticipa la futura integración de publicidad de terceros y exige actualizar proveedor/consentimiento antes de activarla.
+- Esta rama no se ha fusionado ni desplegado. No se ha modificado el backend ni se ha activado una red publicitaria o sistema de pagos.
+
+
+## Aislamiento administrativo y mapa
+
+- El panel de Cerca de Ti administra únicamente cerca_listings y cerca_payment_reports. Se han retirado del panel las consultas y acciones sobre perfiles de mensajería y reportes de CAJUMAV.
+- La autorización administrativa se copia una sola vez desde los superadministradores vigentes a public.cerca_admins. Para conceder o retirar acceso administrativo de Cerca en el futuro, se modifica esa tabla desde el SQL Editor; no se alteran los roles globales de CAJUMAV.
+- Las coordenadas de negocio son opcionales, deben guardarse en pareja y tienen validación de rango. El formulario actual no las solicita todavía; quedan preparadas para los futuros pines.
+- Aplicar en Supabase SQL Editor el archivo completo `cerca-de-aqui/supabase/migrations/20261127110000_cerca_free_listing_and_admin_isolation.sql`. No ejecutar por separado los bloques de esta migración.

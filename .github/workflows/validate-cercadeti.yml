@@ -1,0 +1,95 @@
+name: Validar Cerca de Ti
+on:
+  push:
+    branches: [feature/monetizacion-cercadeti]
+    paths:
+      - "cerca-de-aqui/**"
+      - ".github/workflows/validate-cercadeti.yml"
+  pull_request:
+    paths:
+      - "cerca-de-aqui/**"
+      - ".github/workflows/validate-cercadeti.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Comprobar JavaScript integrado
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("cerca-de-aqui/index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r'<script type="module">(.*?)</script>', html, re.S)
+          assert len(scripts) == 1, f"Se esperaba 1 módulo JS y se encontraron {len(scripts)}"
+          Path("/tmp/cerca-de-ti.mjs").write_text(scripts[0], encoding="utf-8")
+          PY
+          node --check /tmp/cerca-de-ti.mjs
+      - name: Comprobar integración OpenStreetMap y Leaflet
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          html = Path("cerca-de-aqui/index.html").read_text(encoding="utf-8")
+          checks = {
+              "sin iframe de Google Maps": "google.com/maps" not in html and 'id="googleLocalMap"' not in html,
+              "contenedor Leaflet presente": 'id="localMap"' in html,
+              "CSS de Leaflet": "leaflet@1.9.4/dist/leaflet.css" in html,
+              "JavaScript de Leaflet": "leaflet@1.9.4/dist/leaflet.js" in html,
+              "tiles de OpenStreetMap": "tile.openstreetmap.org" in html,
+              "mapa inicializado": "initMap();" in html,
+              "centro por defecto de Pilar": "37.8657,-0.7906" in html,
+          }
+          for label, ok in checks.items():
+              print(("OK" if ok else "ERROR") + " - " + label)
+          if not all(checks.values()):
+              raise SystemExit("La integración del mapa no supera las comprobaciones.")
+          PY
+      - name: Comprobar aislamiento de datos y migración de fichas gratuitas
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          html = Path("cerca-de-aqui/index.html").read_text(encoding="utf-8")
+          sql = Path("cerca-de-aqui/supabase/migrations/20261127110000_cerca_free_listing_and_admin_isolation.sql").read_text(encoding="utf-8")
+          checks = {
+              "panel usa autorización propia Cerca": "rpc('cerca_is_admin')" in html,
+              "panel no consulta profiles": "from('profiles')" not in html,
+              "panel no consulta reports compartidos": "from('reports')" not in html,
+              "ficha gratuita sin pago": "directory_free" in sql and "not_required" in sql,
+              "publicación gratuita sin caducidad": "expires_at is null" in sql,
+              "revisión gratuita sin justificante": "if v_plan = 'directory_free' then" in sql,
+              "tabla de administradores aislada": "public.cerca_admins" in sql,
+              "sin cambios de políticas de CAJUMAV": "alter table public.profiles" not in sql.lower() and "alter table public.reports" not in sql.lower(),
+              "coordenadas opcionales": "add column if not exists latitude" in sql and "add column if not exists longitude" in sql,
+              "validación de pareja de coordenadas": "cerca_coordinates_pair_check" in sql,
+          }
+          for label, ok in checks.items():
+              print(("OK" if ok else "ERROR") + " - " + label)
+          if not all(checks.values()):
+              raise SystemExit("La migración o el aislamiento no superan las comprobaciones.")
+          PY
+      - name: Comprobar enlaces internos
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          class Links(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.hrefs=[]
+              def handle_starttag(self, tag, attrs):
+                  if tag == "a":
+                      href = dict(attrs).get("href","")
+                      if href and not href.startswith(("http://","https://","mailto:","tel:","#","javascript:")):
+                          self.hrefs.append(href.split("#",1)[0].split("?",1)[0])
+          root=Path("cerca-de-aqui")
+          for page in root.glob("*.html"):
+              p=Links(); p.feed(page.read_text(encoding="utf-8"))
+              for href in p.hrefs:
+                  if href and not (page.parent / href).exists():
+                      raise SystemExit(f"Enlace roto: {page} -> {href}")
+          print("Enlaces internos correctos")
+          PY
